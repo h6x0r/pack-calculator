@@ -1,4 +1,4 @@
-# Бинарные файлы и временные директории
+# Binary files and tmp directories
 *.exe
 *.exe~
 *.dll
@@ -9,12 +9,10 @@
 *.log
 *.env
 
-# IDE/Editor директивы (пример - IntelliJ, VSCode и т.п.)
+# IDE/Editor dits (example - IntelliJ, VSCode etc.)
 .idea/
 .vscode/
 *.iml
 
-# Cache (Go модули и т.д.)
+# Cache
 /vendor/
-*.mod
-*.sum
