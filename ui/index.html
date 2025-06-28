@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pack Calculator</title>
+    <style>
+        body{font-family:sans-serif;margin:2rem}
+        input,button{padding:.3rem .6rem;font-size:1rem}
+
+        table{border-collapse:collapse;margin-top:.5rem}
+        th,td{border:1px solid #999;padding:4px 8px;text-align:center}
+        code{background:#f4f4f4;padding:2px 4px;border-radius:4px}
+    </style>
+</head>
+<body>
+<h2>Order calculator</h2>
+<form id="form-order">
+    Items: <label for="items"></label><input id="items" type="number" min="0" required>
+    <button type="submit">Calculate</button>
+</form>
+
+<div id="result" style="white-space:pre-wrap;margin-top:1rem"></div>
+
+<h3>History (this session)</h3>
+<ul id="history"></ul>
+
+<hr>
+<h2>Manage pack sizes</h2>
+
+<form id="form-add">
+    New size: <label for="newSize"></label><input id="newSize" type="number" min="1" required>
+    <button type="submit">Add</button>
+</form>
+
+<table id="packTable">
+    <thead><tr><th>Size</th><th>Actions</th></tr></thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    const $=s=>document.querySelector(s);
+    const frmOrder=$('#form-order'), frmAdd=$('#form-add');
+    const inpItems=$('#items'), inpNew=$('#newSize');
+    const divRes=$('#result'), ulHist=$('#history'), tbBody=$('#packTable tbody');
+
+    // ---- helpers -----------------------------------------------------------
+    function packsToString(packs){
+        const parts=[];
+        const sizes=Object.keys(packs).map(Number).sort((a,b)=>b-a);
+        sizes.forEach(s=>parts.push(`${packs[s]} × ${s}`));
+        return parts.join(' + ');
+    }
+
+    function renderHistory(items, res){
+        const li=document.createElement('li');
+        li.innerHTML=`<code>${items}</code> → ${packsToString(res.packs)} (total ${res.total}, overshoot ${res.overshoot})`;
+        ulHist.prepend(li);
+    }
+
+    frmOrder.addEventListener('submit', async e=>{
+        e.preventDefault();
+        const items=Number(inpItems.value);
+        const r=await fetch(`/api/v1/calculate?items=${items}`);
+        if(!r.ok){ divRes.textContent=await r.text(); return;}
+        const data=await r.json();
+
+        divRes.textContent=`${packsToString(data.packs)}\n`+
+            `Total sent: ${data.total}\nOvershoot:  ${data.overshoot}`;
+        renderHistory(items,data);
+    });
+
+    async function refreshPacks(){
+        const r=await fetch('/api/v1/packs');
+        const sizes=await r.json();
+        tbBody.innerHTML='';
+        sizes.forEach(p=>{
+            const tr=document.createElement('tr');
+            tr.innerHTML=`<td>${p.size}</td>
+      <td>
+        <button data-del="${p.size}">delete</button>
+        <button data-edit="${p.size}">edit</button>
+      </td>`;
+            tbBody.append(tr);
+        });
+    }
+
+    frmAdd.addEventListener('submit', async e=>{
+        e.preventDefault();
+        await fetch('/api/v1/packs',{
+            method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({size:Number(inpNew.value)})
+        });
+        inpNew.value=''; refreshPacks();
+    });
+
+    tbBody.addEventListener('click', async e=>{
+        const btn=e.target, size=btn.dataset.del||btn.dataset.edit;
+        if(!size) return;
+        if(btn.dataset.del){
+            await fetch(`/api/v1/packs/${size}`,{method:'DELETE'});
+        }else{
+            const ns=prompt('New size value:', size);
+            if(ns && ns!==size){
+                await fetch(`/api/v1/packs/${size}`,{
+                    method:'PUT',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({new_size:Number(ns)})
+                });
+            }
+        }
+        refreshPacks();
+    });
+    refreshPacks();
+</script>
+</body>
+</html>

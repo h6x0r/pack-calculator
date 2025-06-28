@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "Pack Calculator API",
+    "_postman_id": "4167c8ae-24cb-4dfc-84e4-9ebb921741f0",
+    "description": "Postman collection for Pack Calculator service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "List packs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/packs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "packs"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Add pack size",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"size\": 750\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/packs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "packs"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Calculate single (query)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/calculate?items=501",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "calculate"
+          ],
+          "query": [
+            {
+              "key": "items",
+              "value": "501"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Calculate single (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": 501\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/calculate",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "calculate"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Calculate batch",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orders\": [\n    100,\n    251,\n    500000\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/calculate/batch",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "calculate",
+            "batch"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List orders history",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/orders",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "orders"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8081"
+    }
+  ]
+}

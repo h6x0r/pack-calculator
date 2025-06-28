@@ -1,0 +1,15 @@
+services:
+  pack-calc:
+    build: .
+    container_name: pack-calc
+    ports:
+      - "8081:8081"
+    environment:
+      PACK_CALC_PORT: ":8081"
+      PACK_CALC_DB:  "/data/pack_calc.db"
+    volumes:
+      - pack_calc_data:/data
+    restart: unless-stopped
+
+volumes:
+  pack_calc_data:
