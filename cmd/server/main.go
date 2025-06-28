@@ -30,7 +30,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("⇢ listening on http://0.0.0.0%s", cfg.HTTPPort)
+		log.Println("server started")
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("server error: %v", err)
 		}
