@@ -4,10 +4,10 @@ import (
 	"log"
 	"sync"
 
+	"github.com/h6x0r/pack-calculator/config"
+	"github.com/h6x0r/pack-calculator/internal/infrastructure/persistence/dto"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"pc/config"
-	"pc/internal/domain"
 )
 
 var (
@@ -22,14 +22,14 @@ func DB(cfg config.Config) *gorm.DB {
 		if err != nil {
 			log.Fatal("open db:", err)
 		}
-		if err := db.AutoMigrate(&domain.Pack{}, &domain.Order{}, &domain.OrderPack{}); err != nil {
+		if err := db.AutoMigrate(&dto.PackEntity{}, &dto.OrderEntity{}, &dto.OrderPackEntity{}); err != nil {
 			log.Fatal(err)
 		}
 		var cnt int64
-		db.Model(&domain.Pack{}).Count(&cnt)
+		db.Model(&dto.PackEntity{}).Count(&cnt)
 		if cnt == 0 {
 			for _, s := range []int{250, 500, 1000, 2000, 5000} {
-				db.Create(&domain.Pack{Size: s})
+				db.Create(&dto.PackEntity{Size: s})
 			}
 		}
 	})

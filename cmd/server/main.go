@@ -10,9 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"pc/config"
-	"pc/internal/infrastructure/api"
-	"pc/internal/infrastructure/persistence"
+	"github.com/h6x0r/pack-calculator/config"
+	"github.com/h6x0r/pack-calculator/internal/infrastructure/api"
+	"github.com/h6x0r/pack-calculator/internal/infrastructure/persistence"
 )
 
 func main() {

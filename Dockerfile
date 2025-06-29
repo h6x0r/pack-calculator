@@ -1,12 +1,12 @@
 FROM golang:1.24-alpine AS build
 RUN apk add --no-cache build-base sqlite-dev
 WORKDIR /src
-COPY go.mod ./
-RUN go mod download && go mod tidy
 
 COPY . .
 
+RUN go mod download && go mod tidy
 RUN go build -o pack-calculator ./cmd/server
+
 FROM alpine:3.20
 RUN apk add --no-cache ca-certificates sqlite-libs
 

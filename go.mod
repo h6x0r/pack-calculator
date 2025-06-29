@@ -1,4 +1,4 @@
-module pc
+module github.com/h6x0r/pack-calculator
 
 go 1.24
 

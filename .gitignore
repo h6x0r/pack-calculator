@@ -16,3 +16,6 @@
 
 # Cache
 /vendor/
+*.mod
+*.sum
+*.db

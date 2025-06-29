@@ -2,7 +2,8 @@ package calc
 
 import (
 	"errors"
-	"pc/internal/domain"
+	"github.com/h6x0r/pack-calculator/internal/application/calc/dto"
+	"github.com/h6x0r/pack-calculator/internal/domain"
 )
 
 type Service struct {
@@ -14,23 +15,17 @@ func New(p domain.PackRepository, o domain.OrderRepository) *Service {
 	return &Service{packs: p, orders: o}
 }
 
-type Result struct {
-	Packs     map[int]int `json:"packs"`
-	Total     int         `json:"total"`
-	Overshoot int         `json:"overshoot"`
-}
-
-func (s *Service) Calculate(items int) (Result, error) {
-	if items < 0 {
-		return Result{}, errors.New("items must be ≥0")
+func (s *Service) Calculate(req dto.CalculateRequest) (dto.CalculateResponse, error) {
+	if req.Items < 0 {
+		return dto.CalculateResponse{}, errors.New("items must be ≥0")
 	}
 
 	ps, err := s.packs.List()
 	if err != nil {
-		return Result{}, err
+		return dto.CalculateResponse{}, err
 	}
 	if len(ps) == 0 {
-		return Result{}, errors.New("no pack sizes configured")
+		return dto.CalculateResponse{}, errors.New("no pack sizes configured")
 	}
 
 	sizes := make([]int, len(ps))
@@ -38,17 +33,18 @@ func (s *Service) Calculate(items int) (Result, error) {
 		sizes[i] = p.Size
 	}
 
-	res, err := Calculate(items, sizes)
+	res, err := Calculate(req.Items, sizes)
 	if err != nil {
-		return Result{}, err
+		return dto.CalculateResponse{}, err
 	}
 
-	order := domain.Order{Items: items, Total: res.Total, Overshoot: res.Overshoot}
+	order := domain.Order{Items: req.Items, Total: res.Total, Overshoot: res.Overshoot}
 	for size, cnt := range res.Packs {
 		order.Packs = append(order.Packs, domain.OrderPack{Size: size, Count: cnt})
 	}
 	if err := s.orders.Save(&order); err != nil {
-		return Result{}, err
+		return dto.CalculateResponse{}, err
 	}
+
 	return res, nil
 }

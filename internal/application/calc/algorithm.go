@@ -2,15 +2,16 @@ package calc
 
 import (
 	"errors"
+	"github.com/h6x0r/pack-calculator/internal/application/calc/dto"
 	"math"
 )
 
-func Calculate(order int, sizes []int) (Result, error) {
+func Calculate(order int, sizes []int) (dto.CalculateResponse, error) {
 	if order < 0 {
-		return Result{}, errors.New("order must be >= 0")
+		return dto.CalculateResponse{}, errors.New("order must be >= 0")
 	}
 	if len(sizes) == 0 {
-		return Result{}, errors.New("no pack sizes provided")
+		return dto.CalculateResponse{}, errors.New("no pack sizes provided")
 	}
 
 	minPacks := sizes[0]
@@ -47,7 +48,7 @@ func Calculate(order int, sizes []int) (Result, error) {
 		}
 	}
 	if target == -1 {
-		return Result{}, errors.New("cannot fulfill order")
+		return dto.CalculateResponse{}, errors.New("cannot fulfill order")
 	}
 
 	packs := map[int]int{}
@@ -57,7 +58,7 @@ func Calculate(order int, sizes []int) (Result, error) {
 		t -= p
 	}
 
-	return Result{
+	return dto.CalculateResponse{
 		Packs:     packs,
 		Total:     target,
 		Overshoot: target - order,
