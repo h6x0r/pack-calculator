@@ -11,8 +11,15 @@ import (
 )
 
 type Handlers struct {
-	calcSvc *calc.Service
-	packSvc *pack.Service
+	calcSvc calc.Service
+	packSvc pack.Service
+}
+
+func NewHandlers(calcSvc calc.Service, packSvc pack.Service) *Handlers {
+	return &Handlers{
+		calcSvc: calcSvc,
+		packSvc: packSvc,
+	}
 }
 
 func (h *Handlers) PacksList(c *gin.Context) {

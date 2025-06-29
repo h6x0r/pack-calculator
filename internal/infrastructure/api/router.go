@@ -15,10 +15,10 @@ func Router(db *gorm.DB) *gin.Engine {
 	packRepo := persistence.NewPackRepo(db)
 	orderRepo := persistence.NewOrderRepo(db)
 
-	h := &Handlers{
-		calcSvc: calc.New(packRepo, orderRepo),
-		packSvc: pack.New(packRepo),
-	}
+	calcSvc := calc.New(packRepo, orderRepo)
+	packSvc := pack.New(packRepo)
+
+	h := NewHandlers(calcSvc, packSvc)
 
 	api := r.Group("/api/v1")
 	{

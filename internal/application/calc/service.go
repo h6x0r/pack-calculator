@@ -6,16 +6,20 @@ import (
 	"github.com/h6x0r/pack-calculator/internal/domain"
 )
 
-type Service struct {
+type Service interface {
+	Calculate(req dto.CalculateRequest) (dto.CalculateResponse, error)
+}
+
+type ServiceImpl struct {
 	packs  domain.PackRepository
 	orders domain.OrderRepository
 }
 
-func New(p domain.PackRepository, o domain.OrderRepository) *Service {
-	return &Service{packs: p, orders: o}
+func New(p domain.PackRepository, o domain.OrderRepository) *ServiceImpl {
+	return &ServiceImpl{packs: p, orders: o}
 }
 
-func (s *Service) Calculate(req dto.CalculateRequest) (dto.CalculateResponse, error) {
+func (s *ServiceImpl) Calculate(req dto.CalculateRequest) (dto.CalculateResponse, error) {
 	if req.Items < 0 {
 		return dto.CalculateResponse{}, errors.New("items must be ≥0")
 	}
