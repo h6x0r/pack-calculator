@@ -16,7 +16,7 @@ Runs as a single container with REST API, clean HTML UI, SQLite WAL persistence 
 | Lean Docker image             | Multi‑stage Alpine, < 20 MB                                       |
 | Makefile shortcuts            | `make start` · `make compose`                                     |
 | Postman collection            | Included for quick API testing                                    |
-| **User‑friendly UI**          | Shows result like “2 × 500 + 1 × 250 → total 1250, overshoot 249” |
+| **User‑friendly UI**          | Shows result like "2 × 500 + 1 × 250 → total 1250, overshoot 249" |
 
 ---
 
@@ -109,12 +109,43 @@ Covers exact/inexact orders, edge‑case 500 000 (23/31/53), tie‑breakers & in
 
 ---
 
-## Algorithm (TL;DR)
-1. **m** = smallest pack.
-2. DP array `dp[0 … order+m]` stores min packs to hit exactly *x*.
-3. For each pack *p*: `dp[x+p] = min(dp[x]+1, dp[x+p])`.
-4. First reachable total ≥ order ⇒ minimal overshoot.
-5. Back‑track via `prev[]` to recover pack counts (fewest packs).
+## Application Architecture
+
+The project is built following Clean Architecture/DDD principles:
+
+- **UI (`ui/`)** — static HTML user interface
+- **Infrastructure (`internal/infrastructure/`)** —
+  - API: HTTP handlers, routing (Gin)
+  - Persistence: database access (GORM, SQLite)
+- **Application (`internal/application/`)** — business logic, services, DTOs, mappers
+- **Domain (`internal/domain/`)** — domain entities and repository interfaces
+- **Config (`config/`)** — configuration loading
+- **cmd/server/** — entry point, server startup
+
+### Layer Interaction
+
+```
+UI → API (handlers) → Application (service) → Domain → Infrastructure (repo)
+```
+
+- **Handlers** receive requests, validate, and call services via interfaces
+- **Services** implement business logic, use DTOs and mappers
+- **Repositories** implement database access via interfaces
+
+---
+
+## Algorithm Description
+
+- Uses dynamic programming to find the minimum number of packs with the least overshoot.
+- Caching of arrays speeds up repeated calculations.
+- The algorithm is robust for large orders and many pack sizes.
+
+**Pseudocode:**
+1. m = minimum pack size
+2. dp[0…order+m] — minimum number of packs for sum x
+3. For each size p: dp[x+p] = min(dp[x]+1, dp[x+p])
+4. First reachable total ≥ order — minimal overshoot
+5. Solution recovery via prev[] (minimum packs)
 
 Cost `O(len(sizes) × (order + m))` – edge test runs in ms.
 

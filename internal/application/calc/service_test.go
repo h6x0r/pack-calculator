@@ -1,9 +1,67 @@
 package calc
 
 import (
+	"errors"
+	"github.com/h6x0r/pack-calculator/internal/application/calc/dto"
+	"github.com/h6x0r/pack-calculator/internal/domain"
 	"reflect"
 	"testing"
 )
+
+type mockPackRepo struct {
+	packs   []domain.Pack
+	listErr error
+}
+
+func (m *mockPackRepo) List() ([]domain.Pack, error) {
+	return m.packs, m.listErr
+}
+func (m *mockPackRepo) Create(size int) (domain.Pack, error) { return domain.Pack{}, nil }
+func (m *mockPackRepo) Delete(size int) error                { return nil }
+func (m *mockPackRepo) Update(oldSize, newSize int) error    { return nil }
+
+type mockOrderRepo struct {
+	saveErr error
+}
+
+func (m *mockOrderRepo) Save(o *domain.Order) error { return m.saveErr }
+
+func TestServiceImpl_Calculate_Success(t *testing.T) {
+	packs := []domain.Pack{{ID: 1, Size: 5}, {ID: 2, Size: 10}}
+	service := New(&mockPackRepo{packs: packs}, &mockOrderRepo{})
+	resp, err := service.Calculate(dto.CalculateRequest{Items: 12})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Total < 12 {
+		t.Errorf("total should be >= items")
+	}
+}
+
+func TestServiceImpl_Calculate_NoPacks(t *testing.T) {
+	service := New(&mockPackRepo{packs: nil}, &mockOrderRepo{})
+	_, err := service.Calculate(dto.CalculateRequest{Items: 5})
+	if err == nil || err.Error() != "no pack sizes configured" {
+		t.Errorf("expected error for no packs, got: %v", err)
+	}
+}
+
+func TestServiceImpl_Calculate_SaveError(t *testing.T) {
+	packs := []domain.Pack{{ID: 1, Size: 5}}
+	service := New(&mockPackRepo{packs: packs}, &mockOrderRepo{saveErr: errors.New("db error")})
+	_, err := service.Calculate(dto.CalculateRequest{Items: 5})
+	if err == nil || err.Error() != "db error" {
+		t.Errorf("expected db error, got: %v", err)
+	}
+}
+
+func TestServiceImpl_Calculate_InvalidItems(t *testing.T) {
+	service := New(&mockPackRepo{packs: []domain.Pack{{ID: 1, Size: 5}}}, &mockOrderRepo{})
+	_, err := service.Calculate(dto.CalculateRequest{Items: -1})
+	if err == nil || err.Error() != "items must be ≥0" {
+		t.Errorf("expected error for negative items, got: %v", err)
+	}
+}
 
 func TestCalculate_CoreCases(t *testing.T) {
 	cases := []struct {
